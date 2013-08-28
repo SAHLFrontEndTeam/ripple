@@ -313,7 +313,7 @@ namespace ripple.MSBuild
             IEnumerable<T> compatibleItems;
 
             // TODO -- this obviously isn't good enough.
-            if (VersionUtility.TryGetCompatibleItems(new FrameworkName(".NETFramework, Version=4.0"), items,
+            if (VersionUtility.TryGetCompatibleItems(new FrameworkName(".NETFramework, Version=4.5"), items,
                                                      out compatibleItems))
             {
                 return compatibleItems;
