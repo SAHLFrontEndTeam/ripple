@@ -32,7 +32,7 @@ namespace ripple.Nuget
         {
             try
             {
-                var nuget = _dependencies.SingleOrDefault(x => x.Name.EqualsIgnoreCase(name));
+                var nuget = _dependencies.FirstOrDefault(x => x.Name.EqualsIgnoreCase(name));
                 if (nuget == null)
                 {
                     RippleLog.DebugMessage(this);
