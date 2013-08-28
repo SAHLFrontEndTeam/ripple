@@ -1,5 +1,6 @@
 ﻿using System;
 using FubuCore.CommandLine;
+using System.Diagnostics;
 
 namespace ripple
 {
@@ -11,6 +12,7 @@ namespace ripple
         {
             try
             {
+                Debugger.Break();
                 var factory = new CommandFactory();
                 factory.RegisterCommands(typeof (Program).Assembly);
 
