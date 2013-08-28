@@ -253,7 +253,7 @@ namespace ripple.MSBuild
             {
                 string assemblyName = Path.GetFileNameWithoutExtension(assem.Name);
 
-                if (assemblyName == "_._") return;
+                if ((assemblyName == "_._") || (assemblyName == "_")) return;
 
                 if (!solution.References.ShouldAddReference(dep, assemblyName)) return;
 
