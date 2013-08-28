@@ -45,16 +45,24 @@ namespace ripple.Nuget
 
         protected override IRemoteNuget find(Dependency query)
 		{
-			SemanticVersion version;
-			if (!SemanticVersion.TryParse(query.Version, out version))
-			{
-				RippleLog.Debug("Could not find exact for " + query);
-				return null;
-			}
+			IVersionSpec versionSpec;
 
-            var versionSpec = new VersionSpec(version);
-            var package = _repository.FindPackages(query.Name, versionSpec, query.DetermineStability(_stability) == NugetStability.Anything, true).SingleOrDefault();
+            if (query.Mode == UpdateMode.Fixed)
+            {
+                SemanticVersion version;
+                if (!SemanticVersion.TryParse(query.Version, out version))
+                {
+                    RippleLog.Debug("Could not find exact for " + query);
+                    return null;
+                }
 
+                versionSpec = new VersionSpec(version);
+            }
+            else
+            {
+                versionSpec = query.VersionSpec;
+            }
+            var package = _repository.FindPackages(query.Name, versionSpec, query.DetermineStability(_stability) == NugetStability.Anything, true).FirstOrDefault();
             if (package == null)
             {
 	            return null;
