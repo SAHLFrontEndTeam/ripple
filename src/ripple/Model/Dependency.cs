@@ -112,7 +112,7 @@ namespace ripple.Model
 
 		public SemanticVersion SemanticVersion()
 		{
-			return Version.IsNotEmpty() ? NuGet.SemanticVersion.Parse(Version) : null;
+            return Version.IsNotEmpty() ? NuGet.SemanticVersion.Parse(Version) : new SemanticVersion("0.0.0.0");
 		}
 
         public void FixAt(string version)
