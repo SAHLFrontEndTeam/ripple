@@ -266,36 +266,45 @@ namespace ripple.MSBuild
 
         public void AddAssemblies(Dependency dep, IEnumerable<IPackageAssemblyReference> assemblies, Solution solution)
         {
-            bool needsSaved = false;
-
-            assemblies = GetCompatibleItemsCore(assemblies).ToList();
-
-            assemblies.Each(assem =>
+            try
             {
-                string assemblyName = Path.GetFileNameWithoutExtension(assem.Name);
+                bool needsSaved = false;
 
-                if ((assemblyName == "_._") || (assemblyName == "_")) return;
+                assemblies = GetCompatibleItemsCore(assemblies).ToList();
 
-                if (!solution.References.ShouldAddReference(dep, assemblyName)) return;
-
-                var nugetDir = _solution.NugetFolderFor(dep.Name);
-                var assemblyPath = nugetDir.AppendPath(assem.Path);
-
-                var hintPath = assemblyPath.PathRelativeTo(_filename.ParentDirectory());
-
-                var configuredDependency = solution.Dependencies.Where(x => x.Name == dep.Name).FirstOrDefault();
-
-                if (AddReference(assemblyName, hintPath, configuredDependency.CopyLocal) == ReferenceStatus.Changed)
+                assemblies.Each(assem =>
                 {
-                    Console.WriteLine("Updated reference for {0} to {1}", _filename, hintPath);
-                    needsSaved = true;
-                }
-            });
+                    string assemblyName = Path.GetFileNameWithoutExtension(assem.Name);
 
-            if (needsSaved)
+                    if ((assemblyName == "_._") || (assemblyName == "_")) return;
+
+                    if (!solution.References.ShouldAddReference(dep, assemblyName)) return;
+
+                    var nugetDir = _solution.NugetFolderFor(dep.Name);
+                    var assemblyPath = nugetDir.AppendPath(assem.Path);
+
+                    var hintPath = assemblyPath.PathRelativeTo(_filename.ParentDirectory());
+
+                    var configuredDependency = solution.Dependencies.Where(x => x.Name == dep.Name).FirstOrDefault();
+
+                    if (AddReference(assemblyName, hintPath, configuredDependency == null ? null : configuredDependency.CopyLocal) == ReferenceStatus.Changed)
+                    {
+                        Console.WriteLine("Updated reference for {0} to {1}", _filename, hintPath);
+                        needsSaved = true;
+                    }
+                });
+
+                if (needsSaved)
+                {
+                    Console.WriteLine("Writing changes to " + _filename);
+                    Write();
+                }
+
+            }
+            catch (Exception)
             {
-                Console.WriteLine("Writing changes to " + _filename);
-                Write();
+                
+                throw;
             }
         }
 
