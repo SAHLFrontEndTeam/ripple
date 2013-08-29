@@ -1,4 +1,8 @@
-﻿using System;
+﻿using FubuCore;
+using FubuCore.Util;
+using NuGet;
+using ripple.Model;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -6,10 +10,6 @@ using System.Runtime.Versioning;
 using System.Xml;
 using System.Xml.Linq;
 using System.Xml.XPath;
-using FubuCore;
-using FubuCore.Util;
-using NuGet;
-using ripple.Model;
 
 namespace ripple.MSBuild
 {
@@ -95,16 +95,15 @@ namespace ripple.MSBuild
                 RippleLog.Info("CopyLocal changed: " + originalCopyLocal + " to " + (string.IsNullOrEmpty(reference.CopyLocal) ? "" : reference.CopyLocal));
             }
 
-
             string original = reference.HintPath;
             reference.HintPath = hintPath;
-            
+
             if (original.IsNotEmpty())
             {
                 original = original.Trim();
             }
 
-            var status = string.Equals(original, hintPath, StringComparison.OrdinalIgnoreCase) ;
+            var status = string.Equals(original, hintPath, StringComparison.OrdinalIgnoreCase);
             if (!status)
             {
                 RippleLog.Info("HintPath changed: " + original + " to " + hintPath);
@@ -185,7 +184,6 @@ namespace ripple.MSBuild
 
                 _references.Value.OrderBy(x => x.Name).Each(reference =>
                 {
-
                     var node = new XElement(_xmlns + "Reference");
                     node.SetAttributeValue("Include", reference.Name);
 
@@ -244,6 +242,7 @@ namespace ripple.MSBuild
                         case "HintPath":
                             reference.HintPath = child.Value;
                             break;
+
                         case "Aliases":
                             reference.Aliases = child.Value;
                             break;
@@ -266,45 +265,36 @@ namespace ripple.MSBuild
 
         public void AddAssemblies(Dependency dep, IEnumerable<IPackageAssemblyReference> assemblies, Solution solution)
         {
-            try
+            bool needsSaved = false;
+
+            assemblies = GetCompatibleItemsCore(assemblies).ToList();
+
+            assemblies.Each(assem =>
             {
-                bool needsSaved = false;
+                string assemblyName = Path.GetFileNameWithoutExtension(assem.Name);
 
-                assemblies = GetCompatibleItemsCore(assemblies).ToList();
+                if ((assemblyName == "_._") || (assemblyName == "_")) return;
 
-                assemblies.Each(assem =>
+                if (!solution.References.ShouldAddReference(dep, assemblyName)) return;
+
+                var nugetDir = _solution.NugetFolderFor(dep.Name);
+                var assemblyPath = nugetDir.AppendPath(assem.Path);
+
+                var hintPath = assemblyPath.PathRelativeTo(_filename.ParentDirectory());
+
+                var configuredDependency = solution.Dependencies.Where(x => x.Name.Equals(dep.Name, StringComparison.InvariantCultureIgnoreCase)).FirstOrDefault();
+
+                if (AddReference(assemblyName, hintPath, configuredDependency == null ? null : configuredDependency.CopyLocal) == ReferenceStatus.Changed)
                 {
-                    string assemblyName = Path.GetFileNameWithoutExtension(assem.Name);
-
-                    if ((assemblyName == "_._") || (assemblyName == "_")) return;
-
-                    if (!solution.References.ShouldAddReference(dep, assemblyName)) return;
-
-                    var nugetDir = _solution.NugetFolderFor(dep.Name);
-                    var assemblyPath = nugetDir.AppendPath(assem.Path);
-
-                    var hintPath = assemblyPath.PathRelativeTo(_filename.ParentDirectory());
-
-                    var configuredDependency = solution.Dependencies.Where(x => x.Name == dep.Name).FirstOrDefault();
-
-                    if (AddReference(assemblyName, hintPath, configuredDependency == null ? null : configuredDependency.CopyLocal) == ReferenceStatus.Changed)
-                    {
-                        Console.WriteLine("Updated reference for {0} to {1}", _filename, hintPath);
-                        needsSaved = true;
-                    }
-                });
-
-                if (needsSaved)
-                {
-                    Console.WriteLine("Writing changes to " + _filename);
-                    Write();
+                    Console.WriteLine("Updated reference for {0} to {1}", _filename, hintPath);
+                    needsSaved = true;
                 }
+            });
 
-            }
-            catch (Exception)
+            if (needsSaved)
             {
-                
-                throw;
+                Console.WriteLine("Writing changes to " + _filename);
+                Write();
             }
         }
 
