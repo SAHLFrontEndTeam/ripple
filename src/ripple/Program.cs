@@ -12,7 +12,7 @@ namespace ripple
         {
             try
             {
-                Debugger.Break();
+                //Debugger.Break();
                 var factory = new CommandFactory();
                 factory.RegisterCommands(typeof (Program).Assembly);
 
