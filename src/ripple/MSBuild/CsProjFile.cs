@@ -67,7 +67,7 @@ namespace ripple.MSBuild
             get { return _projectReferences.Value; }
         }
 
-        public ReferenceStatus AddReference(string name, string hintPath)
+        public ReferenceStatus AddReference(string name, string hintPath, string copyLocal)
         {
             if (hintPath.IsNotEmpty())
             {
@@ -81,6 +81,21 @@ namespace ripple.MSBuild
                 _references.Value.Add(reference);
             }
 
+            string originalCopyLocal = string.IsNullOrEmpty(reference.CopyLocal) ? "" : reference.CopyLocal;
+
+            if (!string.IsNullOrEmpty(copyLocal))
+            {
+                reference.CopyLocal = copyLocal;
+            }
+
+            var copyLocalStatus = string.Equals(originalCopyLocal, string.IsNullOrEmpty(reference.CopyLocal) ? "" : reference.CopyLocal, StringComparison.OrdinalIgnoreCase);
+
+            if (!copyLocalStatus)
+            {
+                RippleLog.Info("CopyLocal changed: " + originalCopyLocal + " to " + (string.IsNullOrEmpty(reference.CopyLocal) ? "" : reference.CopyLocal));
+            }
+
+
             string original = reference.HintPath;
             reference.HintPath = hintPath;
             
@@ -89,13 +104,13 @@ namespace ripple.MSBuild
                 original = original.Trim();
             }
 
-            var status = string.Equals(original, hintPath, StringComparison.OrdinalIgnoreCase) ? ReferenceStatus.Unchanged : ReferenceStatus.Changed;
-            if (status == ReferenceStatus.Changed)
+            var status = string.Equals(original, hintPath, StringComparison.OrdinalIgnoreCase) ;
+            if (!status)
             {
                 RippleLog.Info("HintPath changed: " + original + " to " + hintPath);
             }
 
-            return status;
+            return ((copyLocalStatus && status) ? ReferenceStatus.Unchanged : ReferenceStatus.Changed);
         }
 
         public Reference FindReference(string name)
@@ -186,6 +201,12 @@ namespace ripple.MSBuild
                         node.Add(aliases);
                     }
 
+                    if (reference.CopyLocal.IsNotEmpty())
+                    {
+                        var copylocal = new XElement(_xmlns + "Private") { Value = reference.CopyLocal };
+                        node.Add(copylocal);
+                    }
+
                     itemGroup.Add(node);
                 });
             }
@@ -262,7 +283,9 @@ namespace ripple.MSBuild
 
                 var hintPath = assemblyPath.PathRelativeTo(_filename.ParentDirectory());
 
-                if (AddReference(assemblyName, hintPath) == ReferenceStatus.Changed)
+                var configuredDependency = solution.Dependencies.Where(x => x.Name == dep.Name).FirstOrDefault();
+
+                if (AddReference(assemblyName, hintPath, configuredDependency.CopyLocal) == ReferenceStatus.Changed)
                 {
                     Console.WriteLine("Updated reference for {0} to {1}", _filename, hintPath);
                     needsSaved = true;

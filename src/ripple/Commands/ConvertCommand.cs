@@ -26,10 +26,11 @@ namespace ripple.Commands
 			new RestoreCommand().Execute(new RestoreInput
 			{
 				CacheFlag = input.CacheFlag,
+                FixReferencesFlag = true
 			});
 
 			// Third time's a charm, apparently
-			forceFixReferences(input);
+			//forceFixReferences(input);
 
 			return true;
 		}

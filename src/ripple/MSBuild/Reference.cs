@@ -8,6 +8,7 @@ namespace ripple.MSBuild
 	    public string Name { get; set; }
         public string HintPath { get; set; }
         public string Aliases { get; set; }
+        public string CopyLocal { get; set; }
 
         public override string ToString()
         {

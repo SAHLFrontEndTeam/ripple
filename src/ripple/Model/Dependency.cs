@@ -26,18 +26,25 @@ namespace ripple.Model
 		{	
 		}
 
-	    public Dependency(string name, UpdateMode mode)
+        public Dependency(string name, UpdateMode mode)
             : this(name, string.Empty, mode)
-	    {
-	    }
+        { }
+
 
 	    public Dependency(string name, string version, UpdateMode mode)
 		{
 			Name = name;
 			Version = version ?? string.Empty;
-
 			Mode = mode;
 		}
+
+        public Dependency(string name, string version, UpdateMode mode, string copyLocal)
+        {
+            Name = name;
+            Version = version ?? string.Empty;
+            Mode = mode;
+            CopyLocal = copyLocal;
+        }
 
         public Dependency(string name, SemanticVersion version, UpdateMode mode)
             : this(name, version.ToString(), mode)
@@ -72,6 +79,9 @@ namespace ripple.Model
 		public string Version { get; set; }
 		[XmlAttribute]
 		public UpdateMode Mode { get; set; }
+        [XmlAttribute]
+        public string CopyLocal { get; set; }
+
 
 	    public string Stability
 	    {
