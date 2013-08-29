@@ -2,6 +2,7 @@ using System.ComponentModel;
 using FubuCore.CommandLine;
 using ripple.Model;
 using System.Linq;
+using ripple.Steps;
 
 namespace ripple.Commands
 {
@@ -26,13 +27,16 @@ namespace ripple.Commands
 			new RestoreCommand().Execute(new RestoreInput
 			{
 				CacheFlag = input.CacheFlag,
-                FixReferencesFlag = true
 			});
 
 			// Third time's a charm, apparently
-			//forceFixReferences(input);
+			forceFixReferences(input);
 
-			return true;
+            // fourth time lucky!!!
+            return RippleOperation
+            .For<RestoreInput>(new RestoreInput())
+            .Step<FixReferences>()
+            .Execute();
 		}
 
         // may be later converted into a small step
