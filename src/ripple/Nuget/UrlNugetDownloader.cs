@@ -22,10 +22,30 @@ namespace ripple.Nuget
 
 		public INugetFile DownloadTo(SolutionMode mode, string filename)
         {
-            var client = new WebClient();
+            string proxyserver = System.Configuration.ConfigurationManager.AppSettings["proxyserver"];
+            string[] bypass = System.Configuration.ConfigurationManager.AppSettings["bypass"].Split(',');
+            IWebProxy proxy = new WebProxy(proxyserver, true, bypass); 
+            try 
+            {
+                proxy.Credentials = CredentialCache.DefaultCredentials;            
+                var client = new WebClient();
+                client.Proxy = proxy;
 
-            Console.WriteLine("Downloading {0} to {1}", Url, filename);
-            client.DownloadFile(Url, filename);
+                Console.WriteLine("Downloading {0} to {1}", Url, filename);
+                client.DownloadFile(Url, filename);
+                RippleLog.Info("UrlNugetDownloader: Ripple Writing file: " + filename);
+            }
+            catch (Exception e)
+            {   
+                RippleLog.Info("Exception proxy server: " + proxyserver);
+                RippleLog.Info("Exception downloaded file url: " + Url);
+                RippleLog.Info("Exception credentials: " + proxy.Credentials.ToString());
+                RippleLog.Info("Exception downloaded file system path: " + filename);
+                RippleLog.Info(e.Message);
+                RippleLog.Info(e.StackTrace);
+                RippleLog.Info(e.Message);
+                RippleLog.Info(e.StackTrace);                
+            }
 
             return new NugetFile(filename, mode);
         }

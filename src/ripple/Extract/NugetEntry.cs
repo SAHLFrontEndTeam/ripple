@@ -1,6 +1,8 @@
 ﻿using System.Net;
 using System.Xml.Linq;
 using FubuCore;
+using System.Configuration;
+using System;
 
 namespace ripple.Extract
 {
@@ -50,10 +52,28 @@ namespace ripple.Extract
         public void DownloadTo(string directory)
         {
             var file = directory.AppendPath(getFileName());
-            var client = new WebClient();
+            string proxyserver = System.Configuration.ConfigurationManager.AppSettings["proxyserver"];
+            string[] bypass = System.Configuration.ConfigurationManager.AppSettings["bypass"].Split(',');
+            IWebProxy proxy = new WebProxy(proxyserver, true, bypass); 
+            try
+            {                                
+                proxy.Credentials = CredentialCache.DefaultCredentials;
+                var client = new WebClient();
+                client.Proxy = proxy;
 
-            RippleLog.Info("Downloading {0} to {1}".ToFormat(Url, file));
-            client.DownloadFile(Url, file);
+                RippleLog.Info("Downloading {0} to {1}".ToFormat(Url, file));
+                client.DownloadFile(Url, file);
+                RippleLog.Info("Ripple Writing file: " + file);
+            }
+            catch (Exception e)
+            {
+                RippleLog.Info("Exception proxy server: " + proxyserver);
+                RippleLog.Info("Exception downloaded file url: " + Url);
+                RippleLog.Info("Exception credentials: " + proxy.Credentials.ToString());
+                RippleLog.Info("Exception downloaded file system path: " + file);
+                RippleLog.Info(e.Message);
+                RippleLog.Info(e.StackTrace);
+            }
         }
     }
 }

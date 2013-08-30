@@ -42,7 +42,10 @@ namespace ripple.Nuget
 		public INugetFile DownloadTo(Solution solution, string directory)
         {
             var file = directory.AppendPath(Filename);
-            return _downloader.DownloadTo(solution.Mode, file);
+            INugetFile downloadedfile = _downloader.DownloadTo(solution.Mode, file);
+
+            RippleLog.Info("RemoteNuget: Ripple Writing file: " + file);
+            return downloadedfile;
         }
 
         public override string ToString()

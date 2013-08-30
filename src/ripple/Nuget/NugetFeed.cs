@@ -4,6 +4,7 @@ using System.Net;
 using FubuCore;
 using NuGet;
 using ripple.Model;
+using System;
 
 namespace ripple.Nuget
 {
@@ -29,16 +30,23 @@ namespace ripple.Nuget
         {
             try
             {
+                string proxyserver = System.Configuration.ConfigurationManager.AppSettings["proxyserver"];
+                string[] bypass = System.Configuration.ConfigurationManager.AppSettings["bypass"].Split(',');
+                IWebProxy proxy = new WebProxy(proxyserver, true, bypass); ;
+                proxy.Credentials = CredentialCache.DefaultCredentials;
                 using (var client = new WebClient())
                 {
+                    client.Proxy = proxy;
                     using (var stream = client.OpenRead(_url))
                     {
                         return true;
                     }
                 }
             }
-            catch
-            {
+            catch(Exception e)
+            {                
+                RippleLog.Info(e.Message);
+                RippleLog.Info(e.StackTrace);                
                 return false;
             }
         }

@@ -20,13 +20,27 @@ namespace ripple.Nuget
 
         private XmlDocument loadLatestFeed()
         {
-            var url = Url + FindAllLatestCommand;
-            var client = new WebClient();
-            var text = client.DownloadString(url);
-
             var document = new XmlDocument();
-            document.LoadXml(text);
+            try
+            {
+                var url = Url + FindAllLatestCommand;
 
+                string proxyserver = System.Configuration.ConfigurationManager.AppSettings["proxyserver"];
+                string[] bypass = System.Configuration.ConfigurationManager.AppSettings["bypass"].Split(',');
+                IWebProxy proxy = new WebProxy(proxyserver, true, bypass); ;
+                proxy.Credentials = CredentialCache.DefaultCredentials;
+                var client = new WebClient();
+                client.Proxy = proxy;
+
+                var text = client.DownloadString(url);
+            
+                document.LoadXml(text);            
+            }
+            catch (Exception e)
+            {
+                RippleLog.Info(e.Message);
+                RippleLog.Info(e.StackTrace);                
+            }
             return document;
         }
 
