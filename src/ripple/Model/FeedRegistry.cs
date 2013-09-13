@@ -53,11 +53,17 @@ namespace ripple.Model
                 RippleLog.Debug("Detected branch feed: {0}. Current branch is {1}. Setting directory to {2}".ToFormat(feed, branchName, directory), false);
             }
 
+            var curr =  Directory.GetCurrentDirectory().Split('\\');
+
+            string solName = curr[curr.Length - 1];
+
             directory = directory.ToFullPath();
+
+            RippleLog.Debug("FileSystemNugetFeed: " + directory);
 
             if (feed.Mode == UpdateMode.Fixed)
             {
-                return new FileSystemNugetFeed(directory, feed.Stability);
+                return new FileSystemNugetFeed(directory + "\\" + solName, feed.Stability);
             }
 
             return new FloatingFileSystemNugetFeed(directory, feed.Stability);

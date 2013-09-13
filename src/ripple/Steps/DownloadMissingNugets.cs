@@ -6,6 +6,7 @@ using FubuCore.Descriptions;
 using ripple.Commands;
 using ripple.Model;
 using ripple.Nuget;
+using System;
 
 namespace ripple.Steps
 {
@@ -50,7 +51,7 @@ namespace ripple.Steps
 				var nuget = solution.Restore(query);
 
 				RippleLog.Debug("Downloading " + nuget);
-				nugets.Add(nuget.DownloadTo(solution, solution.PackagesDirectory()));
+                nugets.Add(nuget.DownloadTo(solution, solution.PackagesDirectory()));
 			}).ContinueWith(task =>
 			    {
 			       if (task.Exception == null)

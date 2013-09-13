@@ -5,6 +5,7 @@ using FubuCore;
 using FubuCore.Descriptions;
 using NuGet;
 using ripple.Model;
+using System.IO;
 
 namespace ripple.Nuget
 {
@@ -41,7 +42,21 @@ namespace ripple.Nuget
 
 		public INugetFile DownloadTo(Solution solution, string directory)
         {
-            var file = directory.AppendPath(Filename);
+            var curr =  Directory.GetCurrentDirectory().Split('\\');
+
+            string solName = curr[curr.Length - 1];
+
+            string cachedirectory = directory + "\\" + solName;
+
+            if (!Directory.Exists(cachedirectory))
+            {
+                System.IO.Directory.CreateDirectory(cachedirectory);
+            }
+
+            var file = cachedirectory.AppendPath(Filename);
+            
+
+
             INugetFile downloadedfile = _downloader.DownloadTo(solution.Mode, file);
 
             RippleLog.Info("RemoteNuget: Ripple Writing file: " + file);
