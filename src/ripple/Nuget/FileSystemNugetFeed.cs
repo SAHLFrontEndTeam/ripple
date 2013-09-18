@@ -64,7 +64,7 @@ namespace ripple.Nuget
         public override bool IsOnline()
         {
             // TODO -- Make this smarter
-            return true;
+            return false;
         }
 
         protected override IRemoteNuget find(Dependency query)
@@ -90,18 +90,18 @@ namespace ripple.Nuget
         protected override IRemoteNuget findLatest(Dependency query)
         {
             RippleLog.Debug("Searching for latest of {0} in {1}".ToFormat(query, _directory));
-            //INugetFile nuget = null;
-            var nugets = files
-                .Where(x => query.MatchesName(x.Name) && (!x.IsPreRelease || (x.IsPreRelease && query.DetermineStability(_stability) == NugetStability.Anything)))
-                .ToList();
+            INugetFile nuget = null;
+            //var nugets = files
+            //    .Where(x => query.MatchesName(x.Name) && (!x.IsPreRelease || (x.IsPreRelease && query.DetermineStability(_stability) == NugetStability.Anything)))
+            //    .ToList();
 
-            var nuget = nugets
-                .OrderByDescending(x => x.Version)
-                .FirstOrDefault();
+            //var nuget = nugets
+            //    .OrderByDescending(x => x.Version)
+            //    .FirstOrDefault();
 
             if (nuget == null)
             {
-                //RippleLog.Debug("Bypassing filsystem cache check!");
+                RippleLog.Debug("Bypassing filsystem cache check!");
                 return null;
             }
 
