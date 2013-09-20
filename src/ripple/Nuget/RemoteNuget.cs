@@ -42,11 +42,8 @@ namespace ripple.Nuget
 
 		public INugetFile DownloadTo(Solution solution, string directory)
         {
-            var curr =  Directory.GetCurrentDirectory().Split('\\');
 
-            string solName = curr[curr.Length - 1];
-
-            string cachedirectory = directory + "\\" + solName;
+            string cachedirectory = directory;
 
             if (!Directory.Exists(cachedirectory))
             {
