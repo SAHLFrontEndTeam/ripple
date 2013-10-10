@@ -11,7 +11,7 @@ namespace ripple.Steps
 
         public void Execute(RippleInput input, IRippleStepRunner runner)
         {
-            var attacher = new ReferenceAttacher(Solution);
+            var attacher = new ReferenceAttacher(Solution, input.ExplicitReferencesCleanUpFlag);
 			attacher.Attach();
 		}
 

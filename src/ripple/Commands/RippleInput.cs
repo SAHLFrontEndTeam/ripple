@@ -15,6 +15,10 @@ namespace ripple.Commands
         [FlagAlias("cache", 'c')]
         public string CacheFlag { get; set; }
 
+        [Description("Cleans up non-specified assembly references for packages that explicitly specify references")]
+        [FlagAlias("withcleanup", 'w')]
+        public bool ExplicitReferencesCleanUpFlag { get; set; }
+
         public void Apply(Solution solution)
         {
             RippleLog.Verbose(VerboseFlag);

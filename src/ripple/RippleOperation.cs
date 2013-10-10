@@ -95,7 +95,6 @@ namespace ripple
 					return false;
 				}
 			}
-
 			_solution.EachProject(project => project.RemoveDuplicateReferences());
             _solution.Save(_forceSave);
 
